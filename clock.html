@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Clock Kiosk</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --ring: #3a3a3c;
+      --text: #ffffff;
+      --muted: #8e8e93;
+      --accent: #1db954;
+      --danger: #ff453a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .app {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg);
+    }
+
+    .track {
+      display: flex;
+      width: 200vw;
+      height: 100vh;
+      transform: translateX(0);
+      transition: transform 320ms ease;
+      will-change: transform;
+    }
+
+    .app.spotify .track {
+      transform: translateX(-100vw);
+    }
+
+    .page {
+      width: 100vw;
+      height: 100vh;
+      flex: 0 0 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .clock-page {
+      padding: 4vh 4vw 10vh;
+      flex-direction: column;
+      gap: 4vh;
+    }
+
+    .clocks {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 4vw;
+      width: min(1100px, 100%);
+      align-items: start;
+    }
+
+    .clock-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+    }
+
+    .city {
+      font-size: clamp(22px, 2.4vw, 34px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .clock-wrap {
+      width: min(38vw, 360px);
+      height: min(38vw, 360px);
+      min-width: 260px;
+      min-height: 260px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .digital {
+      font-size: clamp(26px, 2.8vw, 42px);
+      letter-spacing: -0.03em;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sub {
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pill-row {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      z-index: 3;
+    }
+
+    .pill {
+      border: 0;
+      border-radius: 999px;
+      padding: 16px 24px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      background: #2c2c2e;
+      cursor: pointer;
+    }
+
+    .pill.spotify {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .hint {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+
+    .spotify-page {
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .spotify-shell {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #121212;
+    }
+
+    .spotify-topbar {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.5);
+      color: var(--text);
+      flex: 0 0 auto;
+    }
+
+    .spotify-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .spotify-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .spotify-actions button,
+    .spotify-actions a {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      background: #2c2c2e;
+      cursor: pointer;
+    }
+
+    .spotify-actions .open {
+      background: var(--accent);
+    }
+
+    .spotify-frame-wrap {
+      flex: 1 1 auto;
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .spotify-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 24px;
+      background: #121212;
+    }
+
+    .spotify-fallback {
+      width: min(800px, 90vw);
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      text-align: center;
+      color: var(--text);
+      padding: 32px;
+      background: #181818;
+      border-radius: 28px;
+    }
+
+    .spotify-fallback p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 55ch;
+    }
+
+    .spotify-fallback a {
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      padding: 14px 20px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .dots {
+      position: absolute;
+      bottom: 92px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 3;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #3a3a3c;
+    }
+
+    .dot.active {
+      background: white;
+    }
+
+    @media (max-width: 860px) {
+      .clocks {
+        grid-template-columns: 1fr;
+        gap: 5vh;
+      }
+
+      .clock-wrap {
+        width: min(52vw, 320px);
+        height: min(52vw, 320px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="hint">Swipe left or right</div>
+    <div class="track" id="track">
+      <section class="page clock-page">
+        <div class="clocks">
+          <div class="clock-card">
+            <div class="city">sydney</div>
+            <div class="clock-wrap"><canvas id="clock-sydney" width="360" height="360"></canvas></div>
+            <div class="digital" id="digital-sydney">--:--:--</div>
+          </div>
+          <div class="clock-card">
+            <div class="city">seoul</div>
+            <div class="clock-wrap"><canvas id="clock-seoul" width="360" height="360"></canvas></div>
+            <div class="digital" id="digital-seoul">--:--:--</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page spotify-page">
+        <div class="spotify-shell">
+          <div class="spotify-topbar">
+            <div class="spotify-title">Spotify</div>
+            <div class="spotify-actions">
+              <button id="backBtn">Back to clocks</button>
+              <a class="open" href="https://open.spotify.com" target="_blank" rel="noreferrer">Open full Spotify</a>
+            </div>
+          </div>
+          <div class="spotify-frame-wrap">
+            <iframe
+              class="spotify-frame"
+              id="spotifyFrame"
+              src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?theme=0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="eager">
+            </iframe>
+            <div class="spotify-fallback" id="spotifyFallback">
+              <h2>Spotify web player may need the full site</h2>
+              <p>
+                The embedded player works best for playlists, albums, artists, or podcasts. If you want the full Spotify interface,
+                use the button above to open Spotify in its own tab or kiosk window.
+              </p>
+              <a href="https://open.spotify.com" target="_blank" rel="noreferrer">Open Spotify</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="dots">
+      <div class="dot active" id="dot0"></div>
+      <div class="dot" id="dot1"></div>
+    </div>
+
+    <div class="pill-row">
+      <button class="pill" id="clockBtn">Clocks</button>
+      <button class="pill spotify" id="spotifyBtn">Spotify</button>
+    </div>
+  </div>
+
+  <script>
+    const app = document.getElementById('app');
+    const spotifyFrame = document.getElementById('spotifyFrame');
+    const spotifyFallback = document.getElementById('spotifyFallback');
+    let page = 0;
+    let startX = null;
+    let currentX = null;
+    let dragging = false;
+
+    function setPage(next) {
+      page = Math.max(0, Math.min(1, next));
+      app.classList.toggle('spotify', page === 1);
+      document.getElementById('dot0').classList.toggle('active', page === 0);
+      document.getElementById('dot1').classList.toggle('active', page === 1);
+    }
+
+    document.getElementById('clockBtn').addEventListener('click', () => setPage(0));
+    document.getElementById('spotifyBtn').addEventListener('click', () => setPage(1));
+    document.getElementById('backBtn').addEventListener('click', () => setPage(0));
+
+    function pointerDown(x) {
+      startX = x;
+      currentX = x;
+      dragging = true;
+    }
+
+    function pointerMove(x) {
+      if (!dragging) return;
+      currentX = x;
+    }
+
+    function pointerUp() {
+      if (!dragging || startX === null || currentX === null) {
+        dragging = false;
+        startX = null;
+        currentX = null;
+        return;
+      }
+
+      const dx = currentX - startX;
+      if (dx < -70) setPage(1);
+      if (dx > 70) setPage(0);
+
+      dragging = false;
+      startX = null;
+      currentX = null;
+    }
+
+    window.addEventListener('touchstart', e => pointerDown(e.changedTouches[0].clientX), { passive: true });
+    window.addEventListener('touchmove', e => pointerMove(e.changedTouches[0].clientX), { passive: true });
+    window.addEventListener('touchend', pointerUp);
+    window.addEventListener('mousedown', e => pointerDown(e.clientX));
+    window.addEventListener('mousemove', e => pointerMove(e.clientX));
+    window.addEventListener('mouseup', pointerUp);
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') setPage(0);
+      if (e.key === 'ArrowRight') setPage(1);
+    });
+
+    spotifyFrame.addEventListener('error', () => {
+      spotifyFrame.style.display = 'none';
+      spotifyFallback.style.display = 'flex';
+    });
+
+    function drawClock(canvasId, timeZone, digitalId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const digital = document.getElementById(digitalId);
+      const size = canvas.width;
+      const cx = size / 2;
+      const cy = size / 2;
+      const r = size * 0.42;
+
+      const now = new Date();
+      const zoned = new Date(now.toLocaleString('en-US', { timeZone }));
+
+      const ms = zoned.getMilliseconds();
+      const seconds = zoned.getSeconds() + ms / 1000;
+      const minutes = zoned.getMinutes() + seconds / 60;
+      const hours = (zoned.getHours() % 12) + minutes / 60;
+
+      ctx.clearRect(0, 0, size, size);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#1c1c1e';
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#3a3a3c';
+      ctx.stroke();
+
+      for (let i = 0; i < 60; i++) {
+        const angle = (i * 6 - 90) * Math.PI / 180;
+        const outer = r - 12;
+        const inner = i % 5 === 0 ? r - 30 : r - 20;
+        const x1 = cx + Math.cos(angle) * inner;
+        const y1 = cy + Math.sin(angle) * inner;
+        const x2 = cx + Math.cos(angle) * outer;
+        const y2 = cy + Math.sin(angle) * outer;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineWidth = i % 5 === 0 ? 3 : 1;
+        ctx.strokeStyle = i % 5 === 0 ? '#ffffff' : '#3a3a3c';
+        ctx.stroke();
+      }
+
+      drawHand(ctx, cx, cy, (hours * 30 - 90) * Math.PI / 180, r * 0.48, 7, '#ffffff');
+      drawHand(ctx, cx, cy, (minutes * 6 - 90) * Math.PI / 180, r * 0.70, 5, '#ffffff');
+      drawHand(ctx, cx, cy, (seconds * 6 - 90) * Math.PI / 180, r * 0.80, 2, '#ff453a');
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      digital.textContent = zoned.toLocaleTimeString('en-AU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    }
+
+    function drawHand(ctx, cx, cy, angle, length, width, color) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle) * length, cy + Math.sin(angle) * length);
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = color;
+      ctx.stroke();
+    }
+
+    function tick() {
+      drawClock('clock-sydney', 'Australia/Sydney', 'digital-sydney');
+      drawClock('clock-seoul', 'Asia/Seoul', 'digital-seoul');
+      requestAnimationFrame(tick);
+    }
+
+    tick();
+  </script>
+</body>
+</html>
