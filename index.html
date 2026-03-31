@@ -13,6 +13,8 @@
       --muted: #8e8e93;
       --accent: #1db954;
       --danger: #ff453a;
+      --control: #2c2c2e;
+      --control-active: #3a3a3c;
     }
 
     * { box-sizing: border-box; }
@@ -25,7 +27,6 @@
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      touch-action: pan-y;
       user-select: none;
     }
 
@@ -38,70 +39,49 @@
     .app {
       width: 100vw;
       height: 100vh;
-      overflow: hidden;
-      position: relative;
-      background: var(--bg);
-    }
-
-    .track {
       display: flex;
-      width: 200vw;
-      height: 100vh;
-      transform: translateX(0);
-      transition: transform 320ms ease;
-      will-change: transform;
-    }
-
-    .app.spotify .track {
-      transform: translateX(-100vw);
-    }
-
-    .page {
-      width: 100vw;
-      height: 100vh;
-      flex: 0 0 100vw;
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
-      background: var(--bg);
-    }
-
-    .clock-page {
-      padding: 4vh 4vw 10vh;
-      flex-direction: column;
       gap: 4vh;
+      padding: 4vh 4vw 5vh;
+      background: var(--bg);
     }
 
     .clocks {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: flex-start;
       gap: 4vw;
-      width: min(1100px, 100%);
-      align-items: start;
+      width: 100%;
+      max-width: 1100px;
+      min-width: 0;
     }
 
     .clock-card {
+      flex: 0 1 420px;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      gap: 16px;
+      gap: 14px;
     }
 
     .city {
-      font-size: clamp(22px, 2.4vw, 34px);
+      font-size: clamp(22px, 2.2vw, 32px);
       font-weight: 500;
       letter-spacing: -0.02em;
       color: var(--text);
     }
 
     .clock-wrap {
-      width: min(38vw, 360px);
-      height: min(38vw, 360px);
-      min-width: 260px;
-      min-height: 260px;
+      width: min(34vw, 330px);
+      height: min(34vw, 330px);
+      min-width: 220px;
+      min-height: 220px;
       border-radius: 50%;
       display: grid;
       place-items: center;
@@ -114,312 +94,329 @@
     }
 
     .digital {
-      font-size: clamp(26px, 2.8vw, 42px);
+      font-size: clamp(24px, 2.2vw, 36px);
       letter-spacing: -0.03em;
       color: var(--text);
       font-variant-numeric: tabular-nums;
     }
 
     .sub {
-      font-size: clamp(14px, 1.2vw, 18px);
+      font-size: clamp(13px, 1vw, 16px);
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
-    .pill-row {
-      position: absolute;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 14px;
+    .now-playing {
+      width: min(900px, 100%);
+      background: linear-gradient(180deg, #181818 0%, #121212 100%);
+      border: 1px solid #232323;
+      border-radius: 28px;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 22px;
       align-items: center;
-      z-index: 3;
     }
 
-    .pill {
-      border: 0;
-      border-radius: 999px;
-      padding: 16px 24px;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text);
-      background: #2c2c2e;
-      cursor: pointer;
+    .art {
+      width: 110px;
+      height: 110px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #202020;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
     }
 
-    .pill.spotify {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .hint {
-      position: absolute;
-      top: 22px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--muted);
-      font-size: 14px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      z-index: 2;
-    }
-
-    .spotify-page {
-      flex-direction: column;
-      padding: 0;
-    }
-
-    .spotify-shell {
+    .art img {
       width: 100%;
       height: 100%;
-      display: flex;
-      flex-direction: column;
-      background: #121212;
+      object-fit: cover;
+      display: none;
     }
 
-    .spotify-topbar {
-      height: 64px;
+    .art-placeholder {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .np-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .np-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .track {
+      font-size: clamp(24px, 2.4vw, 36px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .artist {
+      font-size: clamp(16px, 1.4vw, 22px);
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
-      background: rgba(0,0,0,0.5);
-      color: var(--text);
-      flex: 0 0 auto;
+      gap: 16px;
+      min-width: 0;
     }
 
-    .spotify-title {
-      font-size: 18px;
-      font-weight: 600;
+    .status {
+      font-size: 14px;
+      color: var(--muted);
+      white-space: nowrap;
     }
 
-    .spotify-actions {
+    .controls {
       display: flex;
-      gap: 10px;
+      gap: 12px;
+      align-items: center;
     }
 
-    .spotify-actions button,
-    .spotify-actions a {
+    .control-btn {
       border: 0;
       border-radius: 999px;
-      padding: 10px 16px;
-      font-size: 14px;
+      width: 58px;
+      height: 58px;
+      background: var(--control);
+      color: var(--text);
+      font-size: 22px;
       font-weight: 600;
-      text-decoration: none;
-      color: white;
-      background: #2c2c2e;
       cursor: pointer;
-    }
-
-    .spotify-actions .open {
-      background: var(--accent);
-    }
-
-    .spotify-frame-wrap {
-      flex: 1 1 auto;
-      position: relative;
       display: grid;
       place-items: center;
-      padding: 18px;
     }
 
-    .spotify-frame {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      border-radius: 24px;
-      background: #121212;
+    .control-btn:active {
+      background: var(--control-active);
     }
 
-    .spotify-fallback {
-      width: min(800px, 90vw);
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-      align-items: center;
-      text-align: center;
-      color: var(--text);
-      padding: 32px;
-      background: #181818;
-      border-radius: 28px;
-    }
-
-    .spotify-fallback p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
-      max-width: 55ch;
-    }
-
-    .spotify-fallback a {
+    .control-btn.primary {
       background: var(--accent);
-      color: white;
-      text-decoration: none;
-      padding: 14px 20px;
-      border-radius: 999px;
-      font-weight: 700;
+      color: #fff;
+      width: 64px;
+      height: 64px;
+      font-size: 24px;
     }
 
-    .dots {
-      position: absolute;
-      bottom: 92px;
-      left: 50%;
-      transform: translateX(-50%);
+    .progress-wrap {
       display: flex;
-      gap: 8px;
-      z-index: 3;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
     }
 
-    .dot {
-      width: 8px;
-      height: 8px;
+    .timecode {
+      font-size: 14px;
+      color: var(--muted);
+      width: 48px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .progress {
+      position: relative;
+      height: 6px;
       border-radius: 999px;
-      background: #3a3a3c;
+      background: #2b2b2b;
+      flex: 1;
+      overflow: hidden;
     }
 
-    .dot.active {
-      background: white;
+    .progress-bar {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: #fff;
+      border-radius: inherit;
     }
 
-    @media (max-width: 860px) {
-      .clocks {
-        grid-template-columns: 1fr;
-        gap: 5vh;
+    @media (max-height: 650px) {
+      .app {
+        gap: 22px;
+        padding-top: 20px;
+        padding-bottom: 20px;
       }
 
       .clock-wrap {
-        width: min(52vw, 320px);
-        height: min(52vw, 320px);
+        width: min(30vw, 280px);
+        height: min(30vw, 280px);
+      }
+
+      .now-playing {
+        padding: 18px 22px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <div class="hint">Swipe left or right</div>
-    <div class="track" id="track">
-      <section class="page clock-page">
-        <div class="clocks">
-          <div class="clock-card">
-            <div class="city">sydney</div>
-            <div class="clock-wrap"><canvas id="clock-sydney" width="360" height="360"></canvas></div>
-            <div class="digital" id="digital-sydney">--:--:--</div>
-          </div>
-          <div class="clock-card">
-            <div class="city">seoul</div>
-            <div class="clock-wrap"><canvas id="clock-seoul" width="360" height="360"></canvas></div>
-            <div class="digital" id="digital-seoul">--:--:--</div>
+  <div class="app">
+    <section class="clocks">
+      <div class="clock-card">
+        <div class="city">Sydney</div>
+        <div class="clock-wrap"><canvas id="clock-sydney" width="360" height="360"></canvas></div>
+        <div class="digital" id="digital-sydney">--:--:--</div>
+        <div class="sub">Australia/Sydney</div>
+      </div>
+
+      <div class="clock-card">
+        <div class="city">Seoul</div>
+        <div class="clock-wrap"><canvas id="clock-seoul" width="360" height="360"></canvas></div>
+        <div class="digital" id="digital-seoul">--:--:--</div>
+        <div class="sub">Asia/Seoul</div>
+      </div>
+    </section>
+
+    <section class="now-playing">
+      <div class="art">
+        <img id="albumArt" alt="Album art" />
+        <div class="art-placeholder" id="artPlaceholder">No Art</div>
+      </div>
+
+      <div class="np-main">
+        <div class="np-label">Now Playing</div>
+        <div class="track" id="trackName">Nothing playing</div>
+        <div class="artist" id="artistName">Select this Pi in Spotify Connect</div>
+
+        <div class="progress-wrap">
+          <div class="timecode" id="elapsed">0:00</div>
+          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="timecode" id="duration">0:00</div>
+        </div>
+
+        <div class="meta">
+          <div class="status" id="playbackStatus">Waiting for playback</div>
+          <div class="controls">
+            <button class="control-btn" id="prevBtn" aria-label="Previous track">⏮</button>
+            <button class="control-btn primary" id="playPauseBtn" aria-label="Play or pause">⏯</button>
+            <button class="control-btn" id="nextBtn" aria-label="Next track">⏭</button>
           </div>
         </div>
-      </section>
-
-      <section class="page spotify-page">
-        <div class="spotify-shell">
-          <div class="spotify-topbar">
-            <div class="spotify-title">Spotify</div>
-            <div class="spotify-actions">
-              <button id="backBtn">Back to clocks</button>
-              <a class="open" href="https://open.spotify.com" target="_blank" rel="noreferrer">Open full Spotify</a>
-            </div>
-          </div>
-          <div class="spotify-frame-wrap">
-            <iframe
-              class="spotify-frame"
-              id="spotifyFrame"
-              src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?theme=0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="eager">
-            </iframe>
-            <div class="spotify-fallback" id="spotifyFallback">
-              <h2>Spotify web player may need the full site</h2>
-              <p>
-                The embedded player works best for playlists, albums, artists, or podcasts. If you want the full Spotify interface,
-                use the button above to open Spotify in its own tab or kiosk window.
-              </p>
-              <a href="https://open.spotify.com" target="_blank" rel="noreferrer">Open Spotify</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <div class="dots">
-      <div class="dot active" id="dot0"></div>
-      <div class="dot" id="dot1"></div>
-    </div>
-
-    <div class="pill-row">
-      <button class="pill" id="clockBtn">Clocks</button>
-      <button class="pill spotify" id="spotifyBtn">Spotify</button>
-    </div>
+      </div>
+    </section>
   </div>
 
   <script>
-    const app = document.getElementById('app');
-    const spotifyFrame = document.getElementById('spotifyFrame');
-    const spotifyFallback = document.getElementById('spotifyFallback');
-    let page = 0;
-    let startX = null;
-    let currentX = null;
-    let dragging = false;
+    const state = {
+      title: '',
+      artist: '',
+      album: '',
+      artUrl: '',
+      isPlaying: false,
+      position: 0,
+      duration: 0,
+      lastUpdateMs: 0,
+      hasData: false,
+    };
 
-    function setPage(next) {
-      page = Math.max(0, Math.min(1, next));
-      app.classList.toggle('spotify', page === 1);
-      document.getElementById('dot0').classList.toggle('active', page === 0);
-      document.getElementById('dot1').classList.toggle('active', page === 1);
+    const trackName = document.getElementById('trackName');
+    const artistName = document.getElementById('artistName');
+    const playbackStatus = document.getElementById('playbackStatus');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const progressBar = document.getElementById('progressBar');
+    const elapsed = document.getElementById('elapsed');
+    const duration = document.getElementById('duration');
+    const albumArt = document.getElementById('albumArt');
+    const artPlaceholder = document.getElementById('artPlaceholder');
+
+    function formatTime(totalSeconds) {
+      const sec = Math.max(0, Math.floor(totalSeconds || 0));
+      const mins = Math.floor(sec / 60);
+      const rem = sec % 60;
+      return `${mins}:${String(rem).padStart(2, '0')}`;
     }
 
-    document.getElementById('clockBtn').addEventListener('click', () => setPage(0));
-    document.getElementById('spotifyBtn').addEventListener('click', () => setPage(1));
-    document.getElementById('backBtn').addEventListener('click', () => setPage(0));
-
-    function pointerDown(x) {
-      startX = x;
-      currentX = x;
-      dragging = true;
-    }
-
-    function pointerMove(x) {
-      if (!dragging) return;
-      currentX = x;
-    }
-
-    function pointerUp() {
-      if (!dragging || startX === null || currentX === null) {
-        dragging = false;
-        startX = null;
-        currentX = null;
-        return;
+    function updateNowPlayingUI() {
+      const nowMs = Date.now();
+      let livePosition = state.position;
+      if (state.isPlaying && state.lastUpdateMs) {
+        livePosition += (nowMs - state.lastUpdateMs) / 1000;
+      }
+      if (state.duration > 0) {
+        livePosition = Math.min(livePosition, state.duration);
       }
 
-      const dx = currentX - startX;
-      if (dx < -70) setPage(1);
-      if (dx > 70) setPage(0);
+      trackName.textContent = state.title || 'Nothing playing';
+      artistName.textContent = state.artist || 'Select this Pi in Spotify Connect';
+      playbackStatus.textContent = state.hasData
+        ? (state.isPlaying ? 'Playing on ClockPi' : 'Paused on ClockPi')
+        : 'Waiting for playback';
+      playPauseBtn.textContent = state.isPlaying ? '⏸' : '▶';
 
-      dragging = false;
-      startX = null;
-      currentX = null;
+      elapsed.textContent = formatTime(livePosition);
+      duration.textContent = formatTime(state.duration);
+      const percent = state.duration > 0 ? (livePosition / state.duration) * 100 : 0;
+      progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+
+      if (state.artUrl) {
+        if (albumArt.src !== state.artUrl) albumArt.src = state.artUrl;
+        albumArt.style.display = 'block';
+        artPlaceholder.style.display = 'none';
+      } else {
+        albumArt.style.display = 'none';
+        artPlaceholder.style.display = 'grid';
+      }
     }
 
-    window.addEventListener('touchstart', e => pointerDown(e.changedTouches[0].clientX), { passive: true });
-    window.addEventListener('touchmove', e => pointerMove(e.changedTouches[0].clientX), { passive: true });
-    window.addEventListener('touchend', pointerUp);
-    window.addEventListener('mousedown', e => pointerDown(e.clientX));
-    window.addEventListener('mousemove', e => pointerMove(e.clientX));
-    window.addEventListener('mouseup', pointerUp);
+    async function fetchNowPlaying() {
+      try {
+        const res = await fetch('/now', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
 
-    window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowLeft') setPage(0);
-      if (e.key === 'ArrowRight') setPage(1);
-    });
+        state.title = data.title || '';
+        state.artist = data.artist || '';
+        state.album = data.album || '';
+        state.artUrl = data.art_url || '';
+        state.isPlaying = Boolean(data.is_playing);
+        state.position = Number(data.position || 0);
+        state.duration = Number(data.duration || 0);
+        state.lastUpdateMs = Date.now();
+        state.hasData = Boolean(data.title || data.artist || data.duration || data.is_playing);
+      } catch (err) {
+        state.hasData = false;
+      }
 
-    spotifyFrame.addEventListener('error', () => {
-      spotifyFrame.style.display = 'none';
-      spotifyFallback.style.display = 'flex';
-    });
+      updateNowPlayingUI();
+    }
+
+    async function sendControl(action) {
+      try {
+        await fetch(`/control/${action}`, { method: 'POST' });
+        setTimeout(fetchNowPlaying, 200);
+      } catch (err) {
+        console.log('Control failed:', action, err);
+      }
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => sendControl('previous'));
+    document.getElementById('playPauseBtn').addEventListener('click', () => sendControl('playpause'));
+    document.getElementById('nextBtn').addEventListener('click', () => sendControl('next'));
 
     function drawClock(canvasId, timeZone, digitalId) {
       const canvas = document.getElementById(canvasId);
@@ -495,9 +492,12 @@
     function tick() {
       drawClock('clock-sydney', 'Australia/Sydney', 'digital-sydney');
       drawClock('clock-seoul', 'Asia/Seoul', 'digital-seoul');
+      updateNowPlayingUI();
       requestAnimationFrame(tick);
     }
 
+    fetchNowPlaying();
+    setInterval(fetchNowPlaying, 3000);
     tick();
   </script>
 </body>
