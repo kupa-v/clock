@@ -113,10 +113,14 @@
       border: 1px solid #232323;
       border-radius: 28px;
       padding: 24px 28px;
-      display: grid;
+      display: none;
       grid-template-columns: 110px 1fr;
       gap: 22px;
       align-items: center;
+    }
+
+    .now-playing.active {
+      display: grid;
     }
 
     .art {
@@ -357,6 +361,38 @@
       if (state.isPlaying && state.lastUpdateMs) {
         livePosition += (nowMs - state.lastUpdateMs) / 1000;
       }
+      if (state.duration > 0) {
+        livePosition = Math.min(livePosition, state.duration);
+      }
+
+      const container = document.querySelector('.now-playing');
+
+      if (!state.hasData) {
+        container.classList.remove('active');
+        return;
+      } else {
+        container.classList.add('active');
+      }
+
+      trackName.textContent = state.title || 'Nothing playing';
+      artistName.textContent = state.artist || '';
+      playbackStatus.textContent = state.isPlaying ? 'Playing on ClockPi' : 'Paused on ClockPi';
+      playPauseBtn.textContent = state.isPlaying ? '⏸' : '▶';
+
+      elapsed.textContent = formatTime(livePosition);
+      duration.textContent = formatTime(state.duration);
+      const percent = state.duration > 0 ? (livePosition / state.duration) * 100 : 0;
+      progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+
+      if (state.artUrl) {
+        if (albumArt.src !== state.artUrl) albumArt.src = state.artUrl;
+        albumArt.style.display = 'block';
+        artPlaceholder.style.display = 'none';
+      } else {
+        albumArt.style.display = 'none';
+        artPlaceholder.style.display = 'grid';
+      }
+    }
       if (state.duration > 0) {
         livePosition = Math.min(livePosition, state.duration);
       }
