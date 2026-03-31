@@ -1,6 +1,1 @@
-cd ~/clock
-git pull
-
-pkill -f http.server || true
-cd ~/clock
-python3 -m http.server 8000
+~/update-clock.sh
