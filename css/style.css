@@ -36,7 +36,8 @@ body {
   justify-content: stretch;
 }
 
-button {
+button,
+select {
   font: inherit;
 }
 
@@ -48,6 +49,57 @@ button {
   align-items: center;
   justify-content: center;
   padding: 3vh 4vw;
+}
+
+.profile-dock {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 300px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(18, 18, 22, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.28);
+}
+
+.profile-label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.profile-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-select {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.profile-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+  cursor: pointer;
+}
+
+.profile-status {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted-2);
 }
 
 .clock-stage {
@@ -256,25 +308,5 @@ canvas {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
-
-@media (max-height: 760px) {
-  .clock-wrap {
-    width: min(31vw, 300px);
-    height: min(31vw, 300px);
-  }
-
-  .now-playing {
-    bottom: 18px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .clock-card,
-  .now-playing,
-  .term-btn {
-    animation: none;
-    transition: none;
   }
 }

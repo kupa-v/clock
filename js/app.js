@@ -7,6 +7,7 @@ const state = {
   duration: 0,
   lastUpdateMs: 0,
   hasData: false,
+  selectedProfileId: "",
 };
 
 const nowPlaying = document.getElementById("nowPlaying");
@@ -18,6 +19,10 @@ const durationEl = document.getElementById("duration");
 const textProgressBar = document.getElementById("textProgressBar");
 const nowPlayingLine = document.getElementById("nowPlayingLine");
 const npIcon = document.getElementById("npIcon");
+
+const profileSelect = document.getElementById("profileSelect");
+const connectProfileBtn = document.getElementById("connectProfileBtn");
+const profileStatus = document.getElementById("profileStatus");
 
 function formatTime(totalSeconds) {
   const sec = Math.max(0, Math.floor(totalSeconds || 0));
@@ -64,8 +69,68 @@ function updateNowPlayingUI() {
   playPauseBtn.textContent = state.isPlaying ? "pause" : "play";
   npIcon.textContent = state.isPlaying ? "▶" : "▮▮";
   nowPlayingLine.textContent = state.isPlaying
-    ? "spotifyctl --status playing"
-    : "spotifyctl --status paused";
+    ? "btctl --status playing"
+    : "btctl --status paused";
+}
+
+function renderProfiles(data) {
+  const profiles = data.profiles || [];
+  const selectedId = data.selected_profile_id || "";
+
+  state.selectedProfileId = selectedId;
+
+  profileSelect.innerHTML = "";
+  for (const profile of profiles) {
+    const option = document.createElement("option");
+    option.value = profile.id;
+    option.textContent = profile.name;
+    if (profile.id === selectedId) {
+      option.selected = true;
+    }
+    profileSelect.appendChild(option);
+  }
+
+  const selectedProfile = profiles.find((p) => p.id === selectedId);
+  if (selectedProfile) {
+    profileStatus.textContent = selectedProfile.connected
+      ? `${selectedProfile.name} connected`
+      : `${selectedProfile.name} selected`;
+  } else {
+    profileStatus.textContent = "No profile selected";
+  }
+}
+
+async function fetchProfiles() {
+  try {
+    const res = await fetch("/api/profiles", { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderProfiles(data);
+  } catch (err) {
+    profileStatus.textContent = "Profiles unavailable";
+  }
+}
+
+async function selectProfile(profileId) {
+  try {
+    profileStatus.textContent = "Connecting...";
+    const res = await fetch("/api/profile/select", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: profileId }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderProfiles(data);
+    if (data.message) {
+      profileStatus.textContent = data.message;
+    }
+  } catch (err) {
+    profileStatus.textContent = "Connection failed";
+  }
 }
 
 async function fetchNowPlaying() {
@@ -208,10 +273,21 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
+connectProfileBtn.addEventListener("click", () => {
+  const id = profileSelect.value;
+  if (id) {
+    selectProfile(id);
+  }
+});
+
 document.getElementById("prevBtn").addEventListener("click", () => sendControl("previous"));
 document.getElementById("playPauseBtn").addEventListener("click", () => sendControl("playpause"));
 document.getElementById("nextBtn").addEventListener("click", () => sendControl("next"));
 
+fetchProfiles();
+setInterval(fetchProfiles, 10000);
+
 fetchNowPlaying();
 setInterval(fetchNowPlaying, 3000);
+
 tick();
