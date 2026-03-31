@@ -9,17 +9,23 @@
 <body>
   <main class="app-shell">
     <section class="profile-dock">
-      <div class="profile-label">Bluetooth profile</div>
-      <div class="profile-controls">
-        <select id="profileSelect" class="profile-select"></select>
-        <button id="connectProfileBtn" class="profile-btn">connect</button>
+      <button
+        id="profileDot"
+        class="profile-dot"
+        aria-label="Bluetooth profile"
+        title="Bluetooth profile">
+      </button>
+
+      <div id="profileMenu" class="profile-menu hidden">
+        <div class="profile-menu-title">Bluetooth Profiles</div>
+        <div id="profileList" class="profile-list"></div>
+        <div id="profileStatus" class="profile-status">No profile selected</div>
       </div>
-      <div id="profileStatus" class="profile-status">No profile selected</div>
     </section>
 
     <section class="clock-stage">
       <article class="clock-card">
-        <div class="city">sydney</div>
+        <div class="city">Sydney</div>
         <div class="clock-wrap">
           <canvas id="clock-sydney" width="420" height="420"></canvas>
         </div>
@@ -27,7 +33,7 @@
       </article>
 
       <article class="clock-card">
-        <div class="city">seoul</div>
+        <div class="city">Seoul</div>
         <div class="clock-wrap">
           <canvas id="clock-seoul" width="420" height="420"></canvas>
         </div>
@@ -36,15 +42,7 @@
     </section>
 
     <section class="now-playing" id="nowPlaying" aria-label="Now playing">
-      <div class="terminal-bar">
-        <span class="term-prefix">y@clockpi</span>
-        <span class="term-sep">:</span>
-        <span class="term-path">~/music</span>
-        <span class="term-prompt">$</span>
-        <span class="term-command" id="nowPlayingLine">btctl --status</span>
-      </div>
-
-      <div class="terminal-output" id="terminalOutput">
+      <div class="terminal-output">
         <span class="np-icon" id="npIcon">▶</span>
         <span class="np-track" id="trackName">Nothing playing</span>
         <span class="np-dash">—</span>
@@ -54,12 +52,6 @@
         <span class="np-bar" id="textProgressBar">░░░░░░░░░░</span>
         <span class="np-bracket">]</span>
         <span class="np-time" id="duration">0:00</span>
-      </div>
-
-      <div class="terminal-controls">
-        <button class="term-btn" id="prevBtn" aria-label="Previous">prev</button>
-        <button class="term-btn primary" id="playPauseBtn" aria-label="Play or pause">play</button>
-        <button class="term-btn" id="nextBtn" aria-label="Next">next</button>
       </div>
     </section>
   </main>

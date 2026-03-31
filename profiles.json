@@ -2,16 +2,19 @@
   {
     "id": "cooper-phone",
     "name": "쿠퍼",
-    "mac": "8C:C5:D0:64:3B:99"
+    "mac": "8C:C5:D0:64:3B:99",
+	"color": "#B6929C"
   },
   {
     "id": "mirae-phone",
     "name": "미래",
     "mac": "11:22:33:44:55:66"
+	"color": "#89CFF0"
   }
   {
     "id": "other",
     "name": "other",
     "mac": "11:22:33:44:55:66"
+	"color": "#4A4A4A"
   }
 ]

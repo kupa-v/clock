@@ -8,20 +8,20 @@ const state = {
   lastUpdateMs: 0,
   hasData: false,
   selectedProfileId: "",
+  profiles: [],
 };
 
 const nowPlaying = document.getElementById("nowPlaying");
 const trackName = document.getElementById("trackName");
 const artistName = document.getElementById("artistName");
-const playPauseBtn = document.getElementById("playPauseBtn");
 const elapsed = document.getElementById("elapsed");
 const durationEl = document.getElementById("duration");
 const textProgressBar = document.getElementById("textProgressBar");
-const nowPlayingLine = document.getElementById("nowPlayingLine");
 const npIcon = document.getElementById("npIcon");
 
-const profileSelect = document.getElementById("profileSelect");
-const connectProfileBtn = document.getElementById("connectProfileBtn");
+const profileDot = document.getElementById("profileDot");
+const profileMenu = document.getElementById("profileMenu");
+const profileList = document.getElementById("profileList");
 const profileStatus = document.getElementById("profileStatus");
 
 function formatTime(totalSeconds) {
@@ -65,39 +65,58 @@ function updateNowPlayingUI() {
   elapsed.textContent = formatTime(livePosition);
   durationEl.textContent = formatTime(state.duration);
   textProgressBar.textContent = bar;
-
-  playPauseBtn.textContent = state.isPlaying ? "pause" : "play";
   npIcon.textContent = state.isPlaying ? "▶" : "▮▮";
-  nowPlayingLine.textContent = state.isPlaying
-    ? "btctl --status playing"
-    : "btctl --status paused";
+}
+
+function updateProfileDot() {
+  const selected = state.profiles.find((p) => p.id === state.selectedProfileId);
+  const color = selected?.color || "#666666";
+  const connected = Boolean(selected?.connected);
+
+  document.documentElement.style.setProperty("--profile-dot", color);
+  profileDot.classList.toggle("connected", connected);
+  profileDot.title = selected ? selected.name : "Bluetooth profile";
 }
 
 function renderProfiles(data) {
-  const profiles = data.profiles || [];
-  const selectedId = data.selected_profile_id || "";
+  state.profiles = data.profiles || [];
+  state.selectedProfileId = data.selected_profile_id || "";
 
-  state.selectedProfileId = selectedId;
+  profileList.innerHTML = "";
 
-  profileSelect.innerHTML = "";
-  for (const profile of profiles) {
-    const option = document.createElement("option");
-    option.value = profile.id;
-    option.textContent = profile.name;
-    if (profile.id === selectedId) {
-      option.selected = true;
+  for (const profile of state.profiles) {
+    const item = document.createElement("button");
+    item.className = "profile-item";
+    if (profile.id === state.selectedProfileId) {
+      item.classList.add("active");
     }
-    profileSelect.appendChild(option);
+
+    item.innerHTML = `
+      <span class="profile-item-left">
+        <span class="profile-item-dot" style="background:${profile.color || "#666666"}"></span>
+        <span class="profile-item-name">${profile.name}</span>
+      </span>
+      <span class="profile-item-state">${profile.connected ? "connected" : "select"}</span>
+    `;
+
+    item.addEventListener("click", async () => {
+      await selectProfile(profile.id);
+      profileMenu.classList.add("hidden");
+    });
+
+    profileList.appendChild(item);
   }
 
-  const selectedProfile = profiles.find((p) => p.id === selectedId);
-  if (selectedProfile) {
-    profileStatus.textContent = selectedProfile.connected
-      ? `${selectedProfile.name} connected`
-      : `${selectedProfile.name} selected`;
+  const selected = state.profiles.find((p) => p.id === state.selectedProfileId);
+  if (selected) {
+    profileStatus.textContent = selected.connected
+      ? `${selected.name} connected`
+      : `${selected.name} selected`;
   } else {
     profileStatus.textContent = "No profile selected";
   }
+
+  updateProfileDot();
 }
 
 async function fetchProfiles() {
@@ -154,15 +173,6 @@ async function fetchNowPlaying() {
   }
 
   updateNowPlayingUI();
-}
-
-async function sendControl(action) {
-  try {
-    await fetch(`/control/${action}`, { method: "POST" });
-    setTimeout(fetchNowPlaying, 180);
-  } catch (err) {
-    console.log("Control failed:", action, err);
-  }
 }
 
 function drawClock(canvasId, timeZone, digitalId) {
@@ -273,16 +283,16 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
-connectProfileBtn.addEventListener("click", () => {
-  const id = profileSelect.value;
-  if (id) {
-    selectProfile(id);
-  }
+profileDot.addEventListener("click", (event) => {
+  event.stopPropagation();
+  profileMenu.classList.toggle("hidden");
 });
 
-document.getElementById("prevBtn").addEventListener("click", () => sendControl("previous"));
-document.getElementById("playPauseBtn").addEventListener("click", () => sendControl("playpause"));
-document.getElementById("nextBtn").addEventListener("click", () => sendControl("next"));
+document.addEventListener("click", (event) => {
+  if (!profileMenu.contains(event.target) && event.target !== profileDot) {
+    profileMenu.classList.add("hidden");
+  }
+});
 
 fetchProfiles();
 setInterval(fetchProfiles, 10000);
