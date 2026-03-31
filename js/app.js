@@ -1,4 +1,113 @@
-// js/app.js
+const state = {
+  title: '',
+  artist: '',
+  album: '',
+  artUrl: '',
+  isPlaying: false,
+  position: 0,
+  duration: 0,
+  lastUpdateMs: 0,
+  hasData: false,
+};
+
+const nowPlaying = document.getElementById('nowPlaying');
+const trackName = document.getElementById('trackName');
+const artistName = document.getElementById('artistName');
+const playbackStatus = document.getElementById('playbackStatus');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const progressBar = document.getElementById('progressBar');
+const elapsed = document.getElementById('elapsed');
+const durationEl = document.getElementById('duration');
+const albumArt = document.getElementById('albumArt');
+const artPlaceholder = document.getElementById('artPlaceholder');
+
+function formatTime(totalSeconds) {
+  const sec = Math.max(0, Math.floor(totalSeconds || 0));
+  const mins = Math.floor(sec / 60);
+  const rem = sec % 60;
+  return `${mins}:${String(rem).padStart(2, '0')}`;
+}
+
+function updateNowPlayingUI() {
+  const nowMs = Date.now();
+  let livePosition = state.position;
+
+  if (state.isPlaying && state.lastUpdateMs) {
+    livePosition += (nowMs - state.lastUpdateMs) / 1000;
+  }
+
+  if (state.duration > 0) {
+    livePosition = Math.min(livePosition, state.duration);
+  }
+
+  if (!state.hasData) {
+    nowPlaying.classList.remove('active');
+    return;
+  }
+
+  nowPlaying.classList.add('active');
+  trackName.textContent = state.title || 'Nothing playing';
+  artistName.textContent = state.artist || '';
+  playbackStatus.textContent = state.isPlaying ? 'Playing on ClockPi' : 'Paused on ClockPi';
+  playPauseBtn.textContent = state.isPlaying ? '⏸' : '▶';
+
+  elapsed.textContent = formatTime(livePosition);
+  durationEl.textContent = formatTime(state.duration);
+
+  const percent = state.duration > 0 ? (livePosition / state.duration) * 100 : 0;
+  progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+
+  if (state.artUrl) {
+    if (albumArt.src !== state.artUrl) {
+      albumArt.src = state.artUrl;
+    }
+    albumArt.style.display = 'block';
+    artPlaceholder.style.display = 'none';
+  } else {
+    albumArt.style.display = 'none';
+    artPlaceholder.style.display = 'grid';
+  }
+}
+
+async function fetchNowPlaying() {
+  try {
+    const res = await fetch('/now', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    state.title = data.title || '';
+    state.artist = data.artist || '';
+    state.album = data.album || '';
+    state.artUrl = data.art_url || '';
+    state.isPlaying = Boolean(data.is_playing);
+    state.position = Number(data.position || 0);
+    state.duration = Number(data.duration || 0);
+    state.lastUpdateMs = Date.now();
+    state.hasData = Boolean(data.title || data.artist || data.duration || data.is_playing);
+  } catch (err) {
+    state.hasData = false;
+  }
+
+  updateNowPlayingUI();
+}
+
+async function sendControl(action) {
+  try {
+    await fetch(`/control/${action}`, { method: 'POST' });
+    setTimeout(fetchNowPlaying, 180);
+  } catch (err) {
+    console.log('Control failed:', action, err);
+  }
+}
+
+function drawClock(canvasId, timeZone, digitalId) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const digital = document.getElementById(digitalId);
+  if (!ctx || !digital) return;
+
+  const size = canvas.width;
+  const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.41;
 
