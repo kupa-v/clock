@@ -1,5 +1,4 @@
 :root {
-:root {
   --bg: #000000;
   --text: #ffffff;
   --muted: #8e8e93;
@@ -242,7 +241,7 @@ canvas {
 }
 
 .digital {
-  font-size: clamp(28px, 2.8vw, 40px);
+  font-size: clamp(28px, 2.35vw, 40px);
   font-weight: 500;
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
