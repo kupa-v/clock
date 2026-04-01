@@ -222,11 +222,11 @@ button {
 }
 
 .clock-wrap {
-  width: min(35vw, 360px);
-  height: min(35vw, 360px);
+  width: min(40vw, 360px);
+  height: min(40vw, 360px);
   min-width: 240px;
   min-height: 240px;
-  border-radius: 50%;
+  border-radius: 40%;
   display: grid;
   place-items: center;
   background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.055), transparent 48%);
