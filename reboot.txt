@@ -1,1 +1,13 @@
 ~/update-clock.sh
+
+
+cd ~/clock
+python3 api.py
+
+
+DISPLAY=:0 XAUTHORITY="$HOME/.Xauthority" chromium \
+  --kiosk \
+  --disable-gpu \
+  --noerrdialogs \
+  --incognito \
+  http://localhost:8000
