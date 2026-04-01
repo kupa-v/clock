@@ -10,4 +10,5 @@ DISPLAY=:0 XAUTHORITY="$HOME/.Xauthority" chromium \
   --disable-gpu \
   --noerrdialogs \
   --incognito \
+  --password-store=basic \
   http://localhost:8000
