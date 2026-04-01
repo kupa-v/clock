@@ -61,7 +61,7 @@ button {
 
 .profile-dock {
   position: fixed;
-  top: 20px;
+  top: 40px;
   z-index: 20;
 }
 
@@ -96,7 +96,7 @@ button {
 .profile-menu {
   position: absolute;
   top: 24px;
-  right: 0;
+  right: 50%;
   min-width: 220px;
   padding: 12px;
   border-radius: 14px;
