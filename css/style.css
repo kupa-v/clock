@@ -61,7 +61,7 @@ button {
 
 .profile-dock {
   position: fixed;
-  top: 40px;
+  top: 60px;
   z-index: 20;
 }
 
