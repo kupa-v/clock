@@ -215,7 +215,7 @@ button {
 }
 
 .city {
-  font-size: clamp(21px, 2.1vw, 38px);
+  font-size: clamp(21px, 2.1vw, 30px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.045em;
