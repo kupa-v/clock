@@ -215,7 +215,7 @@ button {
 }
 
 .city {
-  font-size: clamp(26px, 2.5vw, 38px);
+  font-size: clamp(21px, 2.1vw, 38px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.045em;
@@ -241,7 +241,7 @@ canvas {
 }
 
 .digital {
-  font-size: clamp(28px, 2.35vw, 40px);
+  font-size: clamp(25px, 2.45vw, 40px);
   font-weight: 500;
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
