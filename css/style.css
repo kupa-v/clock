@@ -25,7 +25,15 @@ body {
     radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 34%),
     linear-gradient(180deg, #060607 0%, #000000 100%);
   color: var(--text);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  font-family:
+  "Inter",
+  "Noto Sans CJK KR",
+  "Noto Sans KR",
+  -apple-system,
+  BlinkMacSystemFont,
+  "SF Pro Display",
+  "Segoe UI",
+  sans-serif;
   user-select: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -251,7 +259,10 @@ canvas {
     opacity 220ms ease,
     transform 220ms ease,
     visibility 220ms;
-  font-family: "SFMono-Regular", "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-family:
+  "JetBrains Mono",
+  "Noto Sans Mono CJK KR",
+  monospace;
 }
 
 .now-playing.active {
